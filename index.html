@@ -52,12 +52,14 @@
 </head>
 <body data-gr-c-s-loaded="true">
   <h1>QR Code check test</h1>
-  <img src="./img/qr-code-wikipedia.png"/>
+  <img id="qr-code" src="./img/qr-code-wikipedia.png" width="100%"/>
   <div id="loadingMessage" hidden="">⌛ Loading video...</div>
-  <canvas id="canvas" height="480" width="640"></canvas>
-  <div id="output">
+  <canvas style="display:none;" id="canvas" height="480" width="640"></canvas>
+  <canvas id="c"  style="display:none;" height="480" width="640"></canvas>
+  <div style="display:none;" id="output">
     <div id="outputMessage">No QR code detected.</div>
     <div hidden=""><b>Data:</b> <span id="outputData"></span></div>
+
   </div>
   <script>
     var video = document.createElement("video");
@@ -68,6 +70,9 @@
     var outputMessage = document.getElementById("outputMessage");
     var outputData = document.getElementById("outputData");
 
+    var canvasPic = document.getElementById("c");
+    var qrcodeimg = document.getElementById("qr-code");
+
     function drawLine(begin, end, color) {
       canvas.beginPath();
       canvas.moveTo(begin.x, begin.y);
@@ -76,6 +81,8 @@
       canvas.strokeStyle = color;
       canvas.stroke();
     }
+
+    var flag = true;
 
     // Use facingMode: environment to attemt to get the front camera on phones
     navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } }).then(function(stream) {
@@ -87,19 +94,20 @@
 
     function tick() {
       loadingMessage.innerText = "⌛ Loading video..."
-      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+      if (video.readyState === video.HAVE_ENOUGH_DATA && flag) {
         loadingMessage.hidden = true;
         canvasElement.hidden = false;
         outputContainer.hidden = false;
 
         canvasElement.height = video.videoHeight;
         canvasElement.width = video.videoWidth;
+
         canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
         var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
         var code = jsQR(imageData.data, imageData.width, imageData.height, {
-          inversionAttempts: "dontInvert",
+          inversionAttempts: "dontInvert"
         });
-        if (code) {
+        if (code && flag) {
           drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#FF3B58");
           drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#FF3B58");
           drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#FF3B58");
@@ -107,7 +115,16 @@
           outputMessage.hidden = true;
           outputData.parentElement.hidden = false;
           outputData.innerText = code.data;
-          beep();        
+          beep();
+
+            canvasPic.getContext("2d").drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+            var img = canvasPic.toDataURL("image/png");
+            console.log(img);
+            flag = false;
+            qrcodeimg.style.display = "none";
+            canvasPic.style.display = "block";
+
+            //alert("done");
         } else {
           outputMessage.hidden = false;
           outputData.parentElement.hidden = true;

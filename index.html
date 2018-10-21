@@ -51,8 +51,8 @@
   </style>
 </head>
 <body data-gr-c-s-loaded="true">
-  <h1>jsQR Demo</h1>
-  <p>Pure JavaScript QR code decoding library.</p>
+  <h1>QR Code check test</h1>
+  <img src="./img/qr-code-wikipedia.png"/>
   <div id="loadingMessage" hidden="">⌛ Loading video...</div>
   <canvas id="canvas" height="480" width="640"></canvas>
   <div id="output">
@@ -78,7 +78,7 @@
     }
 
     // Use facingMode: environment to attemt to get the front camera on phones
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(function(stream) {
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } }).then(function(stream) {
       video.srcObject = stream;
       video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
       video.play();
